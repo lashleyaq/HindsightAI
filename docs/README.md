@@ -1,2 +1,2 @@
 # Design Docs
-Project motivation, goals, timeline, presentation materials etc.
+Save code doccumentation, written material, and presentation materials here.
