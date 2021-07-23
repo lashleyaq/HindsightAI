@@ -1,1 +1,6 @@
-
+ftfy
+pytorch=1.7.1
+regex
+tqdm
+torch
+torchvision
