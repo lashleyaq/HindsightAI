@@ -1,6 +1,8 @@
+cv2
 ftfy
+numpy
+pandas
 pytorch=1.7.1
-regex
 tqdm
 torch
 torchvision
