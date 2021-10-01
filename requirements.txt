@@ -1,8 +1,10 @@
+clip
 cv2
+decord
 ftfy
 numpy
 pandas
+PIL
 pytorch=1.7.1
-tqdm
+streamlit
 torch
-torchvision
