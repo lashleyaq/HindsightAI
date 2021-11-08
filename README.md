@@ -7,7 +7,7 @@ To use our application users begin by uploading an mp4 video file. In the backgr
 
 The application is composed of two main components, the graphic user interface (GUI) and the video processing pipeline. The GUI (see Section 4) is powered by Streamlit - a python based web application development framework. The GUI allows users to upload, query, and interact with their video content. The video processing pipeline (see Section 2) is powered by decord and handles the pre-processing of videos as well as their subsequent analysis.
 
-<img src="images/system_designs.png?raw=true"/>  
+<img src="images/system_design.png?raw=true"/>  
 
 Additionally, we plan to expand on the current functionality of the application by implementing a method in which folders of video files can be searched for user's queries. The app will perform a cursory search of each video and alert the user to the videos that are most likely to contain the desired subject. The user will then be able to select one of the videos and view the observed instances in a similar fashion to the single video search feature outlined above.
 
