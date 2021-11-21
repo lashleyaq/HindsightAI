@@ -118,7 +118,7 @@ def main():
             # Display where selected result occurs in the video.
             if selected_result:
                 st.write(f"{keyword_search} found in frame", selected_result)
-                
+
                 video_element.empty()
                 video_object = video_element.video(
                     loadVideo(video_path),
@@ -343,7 +343,6 @@ def filterResult(result, confidenceLevel: float = 0.90):
 
 
 def segment_np_array(arr, num_segments):
-
     """
     Takes in a numpy array for a 3-channel image and a desired number
     of segments for the image. 
