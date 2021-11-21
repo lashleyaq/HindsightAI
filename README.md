@@ -1,4 +1,4 @@
-# CLIPmeetsGAN
+# :eye: Hindsight AI
 
 ## 1. System Architecture
 HindsightAI is a web application that allows users to query their own video content for objects, actions, and situations that occur within it. In order to accomplish this task our application leverages the power of OpenAI’s cutting-edge CLIP image classification model.
