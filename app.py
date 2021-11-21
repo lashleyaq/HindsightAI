@@ -33,36 +33,34 @@ FOLDER_PATH = "."
 if "keywordSearch" not in st.session_state:
     st.session_state["keywordSearch"] = None
 
-
 def main():
     # Main panel
     st.title(":eye: HindsightAI")
-    st.write("### Searching Videos with Machine Learning")
+    subtitle = st.empty()
     video_element = st.empty()
     keyword_search = st.empty()
+    splash_text = st.empty()
+    subtitle.write("### Search Any Video for Anything")
+    splash_text.write('## Please select a video to analyze!')
 
     # Side panel
     st.sidebar.title("Load Media:")
     valid_files = videoCompatabilityCheck(os.listdir(FOLDER_PATH))
     valid_files.insert(0, "Select a file...")
-    selected_filename = st.sidebar.selectbox("Select a video to search...", valid_files)
-
-    if selected_filename == "Select a file...":
-        st.write("## Please select a valid video file to analyze")
-
+    selected_filename = st.sidebar.selectbox("Select a video to search:", valid_files)    
+    segment_options = {'Low':4,'Medium':9,'High':16}
     granularity = st.sidebar.selectbox(
-        "Select the granularity of search...", ["Low", "Medium", "High"]
+        "Select the granularity of the search:",
+        list(segment_options.keys())
     )
-
-    if granularity == "Low":
-        num_segments = 4
-    elif granularity == "Medium":
-        num_segments = 9
-    elif granularity == "High":
-        num_segments = 16
+    num_segments = segment_options[granularity]
 
     # Reactivity
     if selected_filename != "Select a file...":
+        subtitle.empty()
+        splash_text.empty()
+
+        # Instantiate videoplayer
         video_path = os.path.join(FOLDER_PATH, selected_filename)
         video_object = video_element.video(loadVideo(video_path))
         framerate = getFramerate(video_path)
@@ -102,7 +100,13 @@ def main():
                     st.write(f"Searching the video for {keyword_search}...")
 
                 unfiltered = clipAnalyze(tensorDict, text, num_segments=num_segments)
-                clipResult = filterResult(unfiltered, prediction_confidence / 100)
+
+                try:
+                    clipResult = filterResult(unfiltered, prediction_confidence / 100)
+
+                except KeyError:
+                    st.error('No results found at the selected confidence level')
+                    st.stop()
 
                 st.session_state["result"] = clipResult.copy()
                 st.session_state["unfiltered"] = unfiltered.copy()
@@ -117,7 +121,10 @@ def main():
 
             # Display where selected result occurs in the video.
             if selected_result:
-                st.write(f"{keyword_search} found in frame {selected_result} with {clipResult[selected_result][0]}% confidence")
+                st.write(
+                    f"""{keyword_search} found in frame {selected_result},
+                     with {int(clipResult[selected_result][0]*100)}% confidence"""
+                )
 
                 video_element.empty()
                 video_object = video_element.video(
@@ -125,11 +132,8 @@ def main():
                     start_time=int(int(selected_result) // framerate),
                 )
 
-                y1 = unfiltered[selected_result][1][0]
-                y2 = unfiltered[selected_result][1][1]
-                x1 = unfiltered[selected_result][1][2]
-                x2 = unfiltered[selected_result][1][3]
-
+                # Display frame with segmentation bounding box
+                y1,y2,x1,x2 = unfiltered[selected_result][1]
                 frametoDisplay = Image.fromarray(
                     cv2.rectangle(
                         tensorDict[selected_result],
