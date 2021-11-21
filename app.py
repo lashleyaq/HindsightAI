@@ -8,7 +8,7 @@ from decord import VideoReader, cpu
 import os
 import plotly.express as px
 
-# ========================#
+# ======================== #
 st.set_page_config(
     page_title="HindsightAI",
     page_icon=":eye:",
@@ -24,15 +24,14 @@ PAGE_STYLE = """
     """
 
 st.markdown(PAGE_STYLE, unsafe_allow_html=True)
-# ========================#
+# ======================== #
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 MODEL, PREPROCESS = clip.load("ViT-B/32", device=DEVICE)
 FOLDER_PATH = "."
 
-# Initialize streamlit session_state
 if "keywordSearch" not in st.session_state:
-    st.session_state["keywordSearch"] = "na"
+    st.session_state["keywordSearch"] = None
 
 
 def main():
@@ -47,6 +46,10 @@ def main():
     valid_files = videoCompatabilityCheck(os.listdir(FOLDER_PATH))
     valid_files.insert(0, "Select a file...")
     selected_filename = st.sidebar.selectbox("Select a video to search...", valid_files)
+
+    if selected_filename == "Select a file...":
+        st.write("## Please select a valid video file to analyze")
+
     granularity = st.sidebar.selectbox(
         "Select the granularity of search...", ["Low", "Medium", "High"]
     )
@@ -59,9 +62,6 @@ def main():
         num_segments = 16
 
     # Reactivity
-    if selected_filename == "Select a file...":
-        st.write("## Please select a valid video file to analyze")
-
     if selected_filename != "Select a file...":
         video_path = os.path.join(FOLDER_PATH, selected_filename)
         video_object = video_element.video(loadVideo(video_path))
@@ -77,8 +77,8 @@ def main():
         prediction_confidence = st.sidebar.slider(
             "Adjust predicton confidence (%) threshold",
             min_value=70,
-            max_value=95,
-            value=80,
+            max_value=100,
+            value=85,
             step=1,
         )
 
@@ -91,7 +91,7 @@ def main():
 
             # Run clip if a clip result is not cached or if query changes.
             if (
-                st.session_state["keywordSearch"] == "na"
+                st.session_state["keywordSearch"] == None
                 or st.session_state["keywordSearch"] != keyword_search
             ):
                 st.session_state["keywordSearch"] = keyword_search
@@ -117,7 +117,7 @@ def main():
 
             # Display where selected result occurs in the video.
             if selected_result:
-                st.write(f"{keyword_search} found in frame", selected_result)
+                st.write(f"{keyword_search} found in frame {selected_result} with {clipResult[selected_result][0]}% confidence")
 
                 video_element.empty()
                 video_object = video_element.video(
