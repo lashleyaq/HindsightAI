@@ -255,6 +255,7 @@ dependencies:
   - zlib=1.2.11=h36c2ea0_1012
   - zstd=1.5.0=ha95c52a_0
   - pip:
+    - plotly==5.4.0
     - decord==0.6.0
     - regex==2021.9.30
     - torch==1.9.1
