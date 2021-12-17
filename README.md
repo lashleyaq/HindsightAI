@@ -1,5 +1,18 @@
 # :eye: Hindsight AI
 
+## Usage  
+Download the repo and create an anaconda env from the provided .yml file.
+```bash
+$ conda env create -n hindsight-gpu -f hindsight-gpu.yml
+$ conda activate hindsight-gpu
+$ pip install git+https://github.com/openai/CLIP.git
+```
+With the requirements installed and your hindsight-gpu env activated navigate to the repo directory.  
+to launch the app run:
+```bash
+$ streamlit run app.py 
+```
+
 ## System Architecture
 HindsightAI is a web application that allows users to query their own video content for objects, actions, and situations that occur within it. In order to accomplish this task our application leverages the power of OpenAI’s cutting-edge CLIP image classification model.
 
