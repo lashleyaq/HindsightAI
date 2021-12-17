@@ -8,7 +8,7 @@ $ conda activate hindsight-gpu
 $ pip install git+https://github.com/openai/CLIP.git
 ```
 With the requirements installed and your hindsight-gpu env activated navigate to the repo directory.  
-to launch the app run:
+Place any videos you would like to analyze into the repo directory. To launch the app run:
 ```bash
 $ streamlit run app.py 
 ```
