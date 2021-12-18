@@ -2,7 +2,7 @@
 
 ## Important!
 This is a web application that depends on both a GUI and GPU acceleration. 
-It is designed to work on a windows machine with a cuda capable GPU.
+It is designed for use on a windows machine with a CUDA capable GPU.
 
 ## Usage  
 Download the repo and create an anaconda env from the provided .yml file.
