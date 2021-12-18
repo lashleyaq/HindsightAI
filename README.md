@@ -2,7 +2,6 @@
 
 ## Important!
 This is a web application that depends on both a GUI and GPU acceleration. 
-
 It is designed to work on a windows machine with a cuda capable GPU.
 
 ## Usage  
