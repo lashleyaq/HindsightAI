@@ -1,5 +1,9 @@
 # :eye: Hindsight AI
 
+## Important!
+This is a GUI application. 
+A windows machine with graphical interface and CUDA are required.
+
 ## Usage  
 Download the repo and create an anaconda env from the provided .yml file.
 ```bash
