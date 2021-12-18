@@ -48,8 +48,15 @@ def main():
     valid_files = videoCompatabilityCheck(os.listdir(FOLDER_PATH))
     valid_files.insert(0, "Select a file...")
     selected_filename = st.sidebar.selectbox("Select a video to search:", valid_files)    
-
-    num_segments = 9
+    segment_options = {'Low':4,'Medium':9,'High':16, 'Recursive':'Recursive'}
+    granularity = st.sidebar.selectbox(
+        "Select the granularity of the search:",
+        list(segment_options.keys())
+    )
+    if granularity != 'Recursive':
+        num_segments = segment_options[granularity]
+    else:
+    	num_segments = 9
 
     # Reactivity
     if selected_filename != "Select a file...":
@@ -95,7 +102,10 @@ def main():
                 with search_phrase:
                     st.write(f"Searching the video for {keyword_search}...")
 
-                unfiltered = clipDict(tensorDict, text, num_segments=num_segments)
+                if granularity == 'Recursive':
+                    unfiltered = clipDictRec(tensorDict, text, num_segments=num_segments)
+                else:
+                    unfiltered = clipDict(tensorDict, text, num_segments=num_segments)
 
                 try:
                     clipResult = filterResult(unfiltered, prediction_confidence / 100)
@@ -129,18 +139,22 @@ def main():
                 )
 
                 # Display frame with segmentation bounding box
-                y1,y2,x1,x2 = unfiltered[selected_result][1]
-                frametoDisplay = Image.fromarray(
-                    cv2.rectangle(
-                        tensorDict[selected_result],
-                        (x1, y1),
-                        (x2, y2),
-                        (255, 40, 50),
-                        2,
-                    ),
-                    mode="RGB",
-                )
-                st.image(frametoDisplay, channels="RGB")
+                try:
+                    y1,y2,x1,x2 = unfiltered[selected_result][1]
+                    im_copy = np.copy(tensorDict[selected_result])
+                    frametoDisplay = Image.fromarray(
+                        cv2.rectangle(
+                            im_copy,
+                            (x1, y1),
+                            (x2, y2),
+                            (255, 40, 50),
+                            2,
+                        ),
+                        mode="RGB",
+                    )
+                    st.image(frametoDisplay, channels="RGB")
+                except KeyError:
+                    pass
 
                 fig = px.bar(
                     x=list(unfiltered.keys()),
@@ -261,7 +275,72 @@ def clipAnalyze(tensor, searchString:str):
     return result
 
 
-def clipDict(tensorDict, searchString:str, num_segments:int, confidenceLevel:float = 0.90):
+def clipDict(tensorDict, searchString: str, num_segments: int):
+    """
+    Runs a clip analysis on each frame of the provided
+    dictionary's values where the posisble text classes 
+    are the user provided string. Also, renders a streamlit 
+    progress bar that scales to the length of the analysis.
+    Arguments:
+    ==========
+        tensorDict: dict
+            A dictionary of video frame tensors e.g.:
+                tensordict = {
+                    'timeInseconds' = np.tensor(frameTensor)
+                }
+        searchString: str
+            A user supplied string to tokenize and encode
+            for use as a clip imbedding for analysis.
+    Returns:
+    ========
+        sorted_result: dict
+            a dictonary of frame indicies and their corresponding
+            clip probabilities in descending order of probability e.g.:
+                sorted_result = {
+                    'timeInSeconds' = float32(probability)
+                }
+    """
+
+    result = {}
+
+    progress_bar = st.empty()
+    progress_bar = st.progress(0)
+    progress_bar_value = 0
+    # scale progressbar increment value to the len(video)
+    incrementValue = 100 / len(list(tensorDict.items())) / 100
+
+    tokenizedText = clip.tokenize(searchString).to(DEVICE)
+
+    with torch.no_grad():
+        for frameTensorPair in tensorDict.items():
+            progress_bar.progress(progress_bar_value)
+            im = frameTensorPair[1]
+            segments = []
+            indices = []
+
+            for i in segment_np_array(im, num_segments):
+                segments.append(im[i[0] : i[1], i[2] : i[3], :])
+                indices.append([i[0], i[1], i[2], i[3]])
+
+            probs = []
+
+            for segment in segments:
+                    probs.append(clipAnalyze(segment, searchString))
+
+            prob = max(probs)
+            max_index = probs.index(prob)
+            index = indices[max_index]
+
+            result[str(frameTensorPair[0])] = [prob, index]
+
+            progress_bar_value += incrementValue
+
+    progress_bar.empty()
+
+    return result
+
+
+def clipDictRec(tensorDict, searchString:str, num_segments:int, confidenceLevel:float = 0.90):
     '''
 
     Runs a clip analysis on each frame of the provided
@@ -336,7 +415,7 @@ def clipDict(tensorDict, searchString:str, num_segments:int, confidenceLevel:flo
                 max_index = probs.index(prob)
                 index = indices[max_index]
 
-                if prob < highest_conf - 0.05:
+                if prob < highest_conf:
             	    break
 
                 result[str(frameTensorPair[0])] = [prob, index]
@@ -345,8 +424,11 @@ def clipDict(tensorDict, searchString:str, num_segments:int, confidenceLevel:flo
                 y2 = index[1]
                 x1 = index[2]
                 x2 = index[3]
+
+                if y2-y1 < 50:
+                	break
             
-            progress_bar_value += incrementValue
+        progress_bar_value += incrementValue
     
     progress_bar.empty()
 
