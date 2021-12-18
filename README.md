@@ -1,8 +1,9 @@
 # :eye: Hindsight AI
 
 ## Important!
-This is a GUI application. 
-A windows machine with graphical interface and CUDA are required.
+This is a web application that depends on both a GUI and GPU acceleration. 
+
+It is designed to work on a windows machine with a cuda capable GPU.
 
 ## Usage  
 Download the repo and create an anaconda env from the provided .yml file.
